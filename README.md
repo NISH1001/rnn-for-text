@@ -1,5 +1,7 @@
-# rnn-for-text
+# rnn-for-text  
+
 RNN experimentation in python
+
 ---
 
 ## Note
