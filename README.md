@@ -4,9 +4,11 @@ RNN experimentation in python
 
 ---
 
-## Note
+## Note  
+
 For now, the codes are not mine. I am just testing out the codes available and trying to figure out how RNN works.  
 Seems like, RNN isn't that hard (though it depends on the level of knowledge you already have)
+
 ---
 
 ## RNN
