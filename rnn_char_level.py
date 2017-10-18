@@ -1,15 +1,12 @@
 import numpy as np
-import re
 
 # data I/O
-data = open('input.txt', 'r').read()
-data = re.split(r"[ ,.\"]+", data)
-
-words = list(set(data))
-data_size, vocab_size = len(data), len(words)
-print('data has {} words, {} unique.'.format(data_size, vocab_size))
-word_to_ix = { ch:i for i,ch in enumerate(words) }
-ix_to_word = { i:ch for i,ch in enumerate(words) }
+data = open('input.txt', 'r').read() # should be simple plain text file
+chars = list(set(data))
+data_size, vocab_size = len(data), len(chars)
+print('data has {} characters, {} unique.'.format(data_size, vocab_size))
+char_to_ix = { ch:i for i,ch in enumerate(chars) }
+ix_to_char = { i:ch for i,ch in enumerate(chars) }
 
 # hyperparameters
 hidden_size = 100 # size of hidden layer of neurons
@@ -37,8 +34,8 @@ def lossFun(inputs, targets, hprev):
         xs[t] = np.zeros((vocab_size,1)) # encode in 1-of-k representation
         xs[t][inputs[t]] = 1
         hs[t] = np.tanh(np.dot(Wxh, xs[t]) + np.dot(Whh, hs[t-1]) + bh) # hidden state
-        ys[t] = np.dot(Why, hs[t]) + by # unnormalized log probabilities for next words
-        ps[t] = np.exp(ys[t]) / np.sum(np.exp(ys[t])) # probabilities for next words
+        ys[t] = np.dot(Why, hs[t]) + by # unnormalized log probabilities for next chars
+        ps[t] = np.exp(ys[t]) / np.sum(np.exp(ys[t])) # probabilities for next chars
         loss += -np.log(ps[t][targets[t],0]) # softmax (cross-entropy loss)
     # backward pass: compute gradients going backwards
     dWxh, dWhh, dWhy = np.zeros_like(Wxh), np.zeros_like(Whh), np.zeros_like(Why)
@@ -84,18 +81,18 @@ smooth_loss = -np.log(1.0/vocab_size)*seq_length # loss at iteration 0
 while True:
     # prepare inputs (we're sweeping from left to right in steps seq_length long)
     if p+seq_length+1 >= len(data) or n == 0:
-        hprev = np.zeros((hidden_size,1)) # reset RNN memory
-        p = 0 # go from start of data
-    inputs = [word_to_ix[ch] for ch in data[p:p+seq_length]]
-    targets = [word_to_ix[ch] for ch in data[p+1:p+seq_length+1]]
+      hprev = np.zeros((hidden_size,1)) # reset RNN memory
+      p = 0 # go from start of data
+    inputs = [char_to_ix[ch] for ch in data[p:p+seq_length]]
+    targets = [char_to_ix[ch] for ch in data[p+1:p+seq_length+1]]
 
     # sample from the model now and then
     if n % 100 == 0:
-        sample_ix = sample(hprev, inputs[0], 200)
-        txt = ' '.join(ix_to_word[ix] for ix in sample_ix)
-        print('----\n {} \n----'.format(txt))
+      sample_ix = sample(hprev, inputs[0], 200)
+      txt = ''.join(ix_to_char[ix] for ix in sample_ix)
+      print('----\n {} \n----'.format(txt))
 
-    # forward seq_length wordacters through the net and fetch gradient
+    # forward seq_length characters through the net and fetch gradient
     loss, dWxh, dWhh, dWhy, dbh, dby, hprev = lossFun(inputs, targets, hprev)
     smooth_loss = smooth_loss * 0.999 + loss * 0.001
     if n % 100 == 0:
