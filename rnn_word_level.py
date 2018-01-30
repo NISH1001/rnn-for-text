@@ -77,18 +77,23 @@ def train(inputs, targets, hprev):
     dhnext = np.zeros_like(hs[0])
     for t in reversed(range(len(inputs))):
         dy = np.copy(ps[t])
+
         # backprop into y
         dy[targets[t]] -= 1
         dWhy += np.dot(dy, hs[t].T)
         dby += dy
+
         # backprop into h
         dh = np.dot(Why.T, dy) + dhnext
+
         # backprop through tanh nonlinearity
+        # der(tanh) => (1 - (tanh)^2)
         dhraw = (1 - hs[t] * hs[t]) * dh
         dbh += dhraw
         dWxh += np.dot(dhraw, xs[t].T)
         dWhh += np.dot(dhraw, hs[t-1].T)
         dhnext = np.dot(Whh.T, dhraw)
+
     for dparam in [dWxh, dWhh, dWhy, dbh, dby]:
         # clip to mitigate exploding gradients
         np.clip(dparam, -5, 5, out=dparam)
@@ -105,7 +110,7 @@ def sample(h, seed_ix, n):
     for t in range(n):
         h = np.tanh(np.dot(Wxh, x) + np.dot(Whh, h) + bh)
         y = np.dot(Why, h) + by
-        p = np.exp(y) / np.sum(np.exp(y))
+        p = softmax(y)
         ix = np.random.choice(range(vocab_size), p=p.ravel())
         x = np.zeros((vocab_size, 1))
         x[ix] = 1
