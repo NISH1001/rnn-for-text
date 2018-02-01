@@ -2,7 +2,7 @@ import numpy as np
 import re
 
 # data I/O
-data = open('input.txt', 'r').read()
+data = open('data/input.txt', 'r').read()
 data = re.split(r"[ ,.\"]+", data)
 
 words = list(set(data))
