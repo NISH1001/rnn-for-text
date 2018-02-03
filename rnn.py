@@ -94,7 +94,15 @@ class RNN:
         return loss, xs, hs, ys, ps
 
     def backpropagate(self, inputs, targets, xs, hs, ys, ps):
-        # backward pass: compute gradients going backwards
+        """
+            Backpropagation is nothing but chain rule.
+            We start from output node and go backwards computing gradients.
+            In RNN, we accumulate all the gradients at every time step.
+            And finally apply the weight update.
+            Since, there are 3 kinds of weights: Wxh(U) | Why(V) | Whh(W):
+                we do 3 differnt type of derivatives of cost function J wrt these weights
+        """
+
         dWxh, dWhh, dWhy = np.zeros_like(self.Wxh), np.zeros_like(self.Whh), np.zeros_like(self.Why)
         dbh, dby = np.zeros_like(self.bh), np.zeros_like(self.by)
         dhnext = np.zeros_like(hs[0])
@@ -151,7 +159,7 @@ def main():
     vocab_size = len(vocab_to_int)
 
     rnn = RNN(hidden_size, vocab_size, learning_rate)
-    rnn.train(np.array(int_text), 10000, seq_length)
+    rnn.train(np.array(int_text), iteration=100, seq_length = seq_length)
 
     sample_idx = rnn.sample(int_text[0], 20)
     generated_text = ' '.join(int_to_vocab[idx] for idx in sample_idx)
